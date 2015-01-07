@@ -1,0 +1,54 @@
+#merritt-search-form > div {
+    max-height: 400px;
+    overflow: auto;
+    width: 100%;
+}
+
+#merritt-collections { 
+    list-style-type: none;
+}
+
+#merritt-collections > li {
+    font-size: 1.3em;
+}
+
+#merritt-collections > li > button { 
+    margin-left:15px;
+}
+
+#merritt-items { 
+    list-style-type: none;
+}
+
+#merritt-items > li {    
+    height: 100px;
+    margin: 10px;
+    overflow: hidden;
+    padding-bottom: 10px;
+    border-bottom: 1px solid black;q
+}
+
+#merritt-items > li > img {
+    float:left;
+    height: 100px;    
+    margin-left: 5px;
+}
+
+#merritt-items > li > input {    
+    float: left;
+    position: relative;
+    top: 40px;
+}
+
+#merritt-items > li > div > h3 {
+    font-size: 18px;
+    line-height: 0.8;
+    margin: 0;
+}
+
+#merritt-items > li > div {
+    overflow: hidden;
+    padding-left: 12px;
+    padding-top: 4px;
+    padding-bottom: 2px;
+}
