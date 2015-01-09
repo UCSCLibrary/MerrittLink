@@ -33,14 +33,13 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
             $hashvalue = md5(file_get_contents($fileUrl));
             echo($fileUrl.' | md5 | '.$hashvalue.' | '.$file->original_filename."\n");
         }
+        echo "#%eof"
         $this->view->manifest =  ob_get_clean();
     }
 
     private function _getManifestUrl($item) {
-        return $this->_getSiteBase().public_url('merritt-link/manifest/object/item/'.$item->id);
-        
+        return $this->_getSiteBase().public_url('merritt-link/manifest/object/item/'.$item->id);        
     }
-
 
   public function testAction() {
     echo("post:<pre>\n");
@@ -83,9 +82,8 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
             echo(' | '.$date);
             echo("\n");
         }    
-            $this->view->manifest =  ob_get_clean();
-        
-        
+        echo "#%eof"
+            $this->view->manifest =  ob_get_clean();               
     }
 
     private function _getSiteBase() {

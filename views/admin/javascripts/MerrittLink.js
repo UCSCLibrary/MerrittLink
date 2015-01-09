@@ -23,9 +23,18 @@ jQuery(document).ready(function() {
 	});
     });
 
+    jQuery('#merritt-select-all').click(function(){
+	jQuery('#merritt-items > li > input').prop('checked',true);
+    });
+    jQuery('#merritt-select-none').click(function(){
+	jQuery('#merritt-items > li > input').prop('checked',false);
+    });
+
     jQuery('#merritt-search-form > #submit_search_advanced').click(function(e) {
 	e.preventDefault();
 	url= jQuery('#merritt-search-form').attr('action');
+
+	jQuery('#merritt-selection-buttons').show();
 
 	jQuery('#merritt-items').html('');
 
