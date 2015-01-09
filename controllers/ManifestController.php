@@ -24,14 +24,14 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
         echo('#%checkm_0.7
 #%profile | http://uc3.cdlib.org/registry/ingest/manifest/mrt-ingest-manifest
 #%prefix | nfo: | http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#
-#%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue  | nfo:fileName
+#%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:mimeType
 ');
         echo(isset($metsline) ? $metsline."\n" : '');
         $files = $item->getFiles();
         foreach($files as $file) {
             $fileUrl = file_display_url($file);
             $hashvalue = md5(file_get_contents($fileUrl));
-            echo($fileUrl.' | md5 | '.$hashvalue.' | '.$file->original_filename."\n");
+            echo($fileUrl.' | md5 | '.$hashvalue.' |  |  | '.$file->original_filename."\n");
         }
         echo "#%eof"
         $this->view->manifest =  ob_get_clean();
@@ -62,14 +62,14 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 #%profile | http://uc3.cdlib.org/registry/ingest/manifest/mrt-batch-manifest
 #%prefix | mrt: | http://merritt.cdlib.org/terms#
 #%prefix | nfo: | http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#
-#%fields | nfo:fileUrl | nfo:fileName | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date
+#%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:primaryIdentifier | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date
 ');
         foreach($items as $item_id => $val) {
 //            die('items: '.$item_id);
             $item = get_record_by_id('item',$item_id);
             
             echo($this->_getManifestUrl($item));
-            echo(' | '.$item->id.'.checkm');
+            echo(' |  |  |  |  | '.$item->id.'.checkm');
 
             $title = metadata($item,array("Dublin Core","Title"));
             $creator = metadata($item,array("Dublin Core","Creator"));
