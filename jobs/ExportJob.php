@@ -107,7 +107,7 @@ class MerrittLink_ExportJob extends Omeka_Job_AbstractJob
         return($this->_fileUrl.pathinfo($manifestFilename,PATHINFO_FILENAME));
     } 
 
-    private function _submitBatchToMerritt($batchManifestUrl,$collection,$url='https: //merritt-stage.cdlib.org/object/ingest') {
+    private function _submitBatchToMerritt($batchManifestUrl,$collection,$url='https: //merritt.cdlib.org/object/ingest') {
         $postFields = array(
             'type' => 'container-batch-manifest',
             'responseForm' => 'json',

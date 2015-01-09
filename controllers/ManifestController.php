@@ -41,6 +41,18 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
         
     }
 
+
+  public function testAction() {
+    echo("post:<pre>\n");
+    print_r($_POST);
+    echo("\n\nfiles:\n");
+    print_r($_FILES);
+    echo("</pre>");
+    die('d');
+  } 
+
+
+
     public function batchAction() {
         $job_id = $this->getParam('job');
         $job = get_db()->getTable('MerrittExportJob')->find($job_id);
@@ -70,10 +82,10 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
             echo(' | '.$title);
             echo(' | '.$date);
             echo("\n");
-            
+        }    
             $this->view->manifest =  ob_get_clean();
         
-        }
+        
     }
 
     private function _getSiteBase() {
