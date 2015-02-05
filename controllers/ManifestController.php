@@ -33,7 +33,7 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
             $hashvalue = md5(file_get_contents($fileUrl));
             echo($fileUrl.' | md5 | '.$hashvalue.' |  |  | '.$file->original_filename."\n");
         }
-        echo "#%eof"
+        echo "#%eof";
         $this->view->manifest =  ob_get_clean();
     }
 
@@ -82,7 +82,7 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
             echo(' | '.$date);
             echo("\n");
         }    
-        echo "#%eof"
+        echo "#%eof";
             $this->view->manifest =  ob_get_clean();               
     }
 
