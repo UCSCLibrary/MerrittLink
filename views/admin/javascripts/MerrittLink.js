@@ -26,7 +26,6 @@ jQuery(document).ready(function() {
 	    registerDeleteButtons();
 	});
     });
-
     registerDeleteButtons();
 
     jQuery('#merritt-select-all').click(function(){

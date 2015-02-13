@@ -41,8 +41,7 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInitialize()
     {
- 
-      require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'jobs' . DIRECTORY_SEPARATOR . 'ExportJob.php';
+        require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'jobs' . DIRECTORY_SEPARATOR . 'ExportJob.php';
 
     }
 

@@ -15,6 +15,9 @@
 class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionController
 {    
     public function objectAction() {
+
+      $this->getResponse()->setHeader('Content-Type', 'text/plain');
+
         $item = get_record_by_id('Item',$this->getParam('item'));
 
         if(plugin_is_active('MetsExport'))      
@@ -31,7 +34,8 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
         foreach($files as $file) {
             $fileUrl = file_display_url($file);
             $hashvalue = md5(file_get_contents($fileUrl));
-            echo($fileUrl.' | md5 | '.$hashvalue.' |  |  | '.$file->original_filename."\n");
+            echo($fileUrl.' | | | | | '.$file->original_filename."\n");
+	    //            echo($fileUrl.' | md5 | '.$hashvalue.' |  |  | '.$file->original_filename."\n");
         }
         echo "#%eof";
         $this->view->manifest =  ob_get_clean();
@@ -53,6 +57,8 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 
 
     public function batchAction() {
+      $this->getResponse()->setHeader('Content-Type', 'text/plain');
+
         $job_id = $this->getParam('job');
         $job = get_db()->getTable('MerrittExportJob')->find($job_id);
         $items = unserialize($job->items);
@@ -65,25 +71,29 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 #%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:primaryIdentifier | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date
 ');
         foreach($items as $item_id => $val) {
-//            die('items: '.$item_id);
+
             $item = get_record_by_id('item',$item_id);
             
             echo($this->_getManifestUrl($item));
-            echo(' |  |  |  |  | '.$item->id.'.checkm');
+            echo(' | | | | | ');
+	    echo($item->id.'.checkm');
 
+	    echo(' | ');
+	    /*
             $title = metadata($item,array("Dublin Core","Title"));
             $creator = metadata($item,array("Dublin Core","Creator"));
             $date = metadata($item,array("Dublin Core","Date"));
             $localId = metadata($item,array("Dublin Core","Identifier"));
 
-            echo(' | '.$localId);
+            echo(' | | '.$localId);
             echo(' | '.$creator);
             echo(' | '.$title);
             echo(' | '.$date);
+	    */
             echo("\n");
         }    
         echo "#%eof";
-            $this->view->manifest =  ob_get_clean();               
+        $this->view->manifest =  ob_get_clean();               
     }
 
     private function _getSiteBase() {

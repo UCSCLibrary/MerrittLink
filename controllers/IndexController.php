@@ -124,6 +124,8 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           'profile' => $collection,
           'file' => '@'.$tmpfname
       );
+      //      die($batchManifestUrl);
+      //die($curlCommand);
 
       exec($curlCommand,$output);
 
