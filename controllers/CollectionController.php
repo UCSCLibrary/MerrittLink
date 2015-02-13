@@ -30,7 +30,8 @@ class MerrittLink_CollectionController extends Omeka_Controller_AbstractActionCo
       $collection->save();
       $return = array(
           'id'=>$collection->id,
-          'slug'=> $slug
+          'slug'=> $slug,
+	  'title' => absolute_url('merritt-link/collection/delete/id/')
       );
       $this->view->data = $return;
   } 
