@@ -117,7 +117,7 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
         fclose($metsFile);
         */
         //return( $this->_getSiteBase().public_url('files/Merritt/'.$item->id.'/'.$metsFilename) .' | md5 | '.md5($metsXml).' | '.$metsFilename);
-        return( $metsUrl .' | md5 | '.md5($metsXml).' | '.$metsFilename);
+        return( $metsUrl .' | md5 | '.md5($metsXml).' | | | '.$metsFilename);
     }
 
 }
