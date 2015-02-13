@@ -35,7 +35,7 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
             $fileUrl = file_display_url($file);
 	    $filename = pathinfo($file->original_filename,PATHINFO_FILENAME);
             $hashvalue = md5(file_get_contents($fileUrl));
-            echo($fileUrl.' | | | | | '.$file->original_filename."\n");
+            echo($fileUrl.' | | | | | '.$filename."\n");
 	    //            echo($fileUrl.' | md5 | '.$hashvalue.' |  |  | '.$file->original_filename."\n");
         }
         echo "#%eof";
