@@ -67,34 +67,11 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           $job->items=serialize($items);
       }else {
           $job->items=serialize($_POST['export_items']);
-      }
+     } 
       $job->save();
       $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);//TODO url of batch manifest
+      //            die($url);
       return $this->_submitBatchToMerritt($url,$collection->slug);
-      /*
-      require_once(dirname(dirname(__FILE__)).'/jobs/ExportJob.php');
-      $options = array(
-          'collection'=>$collection->slug,
-          'fileurl'=>absolute_url('files/')
-      );
-      $file = get_record_by_id('file',73);
-      die(file_display_url($file));
-      if(isset($_POST['bulkAdd'])){
-          $options['bulk']=true;
-          $exporter->setBulk(true);
-          $options['post'] = serialize($_POST);
-      }else if(isset($_POST['merritt_export'])) {
-          $options['bulk']=false;
-          $options['items']= serialize($_POST['export_items']);
-      }
-      
-      try{
-          $dispacher = Zend_Registry::get('job_dispatcher');
-          $dispacher->sendLongRunning('MerrittLink_ExportJob',$options);
-      } catch (Exception $e) {
-          throw($e);
-      }
-      */
   }
 
   private function _getCollectionOptions() {
@@ -124,9 +101,7 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           'profile' => $collection,
           'file' => '@'.$tmpfname
       );
-      //      die($batchManifestUrl);
-      //die($curlCommand);
-
+  
       exec($curlCommand,$output);
 
       unlink($tmpfname);
@@ -139,33 +114,6 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       if($status == 'ERROR' || $status == 'FAILURE')
          return 'Failure exporting to merritt.'; 
       return "Successfully submitted Omeka items to Merritt with batch identifier ".$state->{'bat:batchID'}.". Items are now ".strtolower($status)."." ;
-
-/*
-
-    $post = http_build_query($postFields);
-//      $post = "file=@/storage/omeka/files/merritt_IjdCWL&".http_build_query($postFields);
-
-	$headers = array("Content-Type:multipart/form-data");	
-	$filesize = (string) filesize("/storage/omeka/files/merritt_IjdCWL");
-
-      $ch = curl_init();
-//      curl_setopt($ch, CURLOPT_URL,$url); 
-      curl_setopt($ch, CURLOPT_URL,'ec2-54-67-110-244.us-west-1.compute.amazonaws.com/merritt-link/manifest/test');
-      curl_setopt($ch, CURLOPT_HEADER, true);
-      curl_setopt($ch, CURLOPT_POST, 1);
-      curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-      curl_setopt($ch,CURLOPT_INFILESIZE,$filesize);
-      curl_setopt($ch, CURLOPT_POSTFIELDS,$post);
-      curl_setopt($ch, CURLOPT_USERPWD, get_option('merritt_username') . ":" . get_option('merritt_password') );
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      $server_output = curl_exec ($ch);
-      curl_close ($ch);
-      
-      unlink($tmpfname);
-      
-//      return($server_output."\n<pre>".json_encode($postFields)."</pre>");
-      return($server_output."\n".$post);
-*/
   }
 
   private function _returnSearchResults() {

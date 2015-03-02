@@ -75,17 +75,39 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 
             $item = get_record_by_id('item',$item_id);
             
-            echo($this->_getManifestUrl($item));
-            echo(' | | | | | ');
-	    echo($item->id.'.checkm');
-
-	    echo(' | ');
-	    /*
+	    $manifestUrl = $this->_getManifestUrl($item);
+	    $hash = '';
+	    $hashAlg = '';
+	    $filesize = '';
+	    $modified = '';
+	    $filename = $item->id.'.checkm';
+	    $pid = '';
             $title = metadata($item,array("Dublin Core","Title"));
-            $creator = metadata($item,array("Dublin Core","Creator"));
+	    $creator = metadata($item,array("Dublin Core","Creator"));
             $date = metadata($item,array("Dublin Core","Date"));
             $localId = metadata($item,array("Dublin Core","Identifier"));
 
+	    $title = preg_replace('/[^A-Za-z0-9",.;:@#!%&_ \'\/\-\t\$\+\^\*\\\?\(\)]/', '', $title);
+	    $creator = preg_replace('/[^A-Za-z0-9",.:@ \'\/\-\t\(\)]/', '', $creator);
+            $date = preg_replace('/[^A-Za-z0-9: \/\-]/', '', $date);
+            $localId = preg_replace('/[^A-Za-z0-9",.;:@#!%&_ \'\/\-\t\$\+\^\*\\\?\(\)]/', '', $localId);
+
+            echo $manifestUrl;
+	    echo ' | '.$hashAlg;
+	    echo ' | '.$hash;
+	    echo ' | '.$filesize;
+	    echo ' | '.$modified;
+	    echo ' | '.$filename;
+	    echo ' | '.$pid;
+	    echo ' | '.$localId;
+	    echo ' | '.$creator;
+	    echo ' | '.$title;
+	    echo ' | '.$date;
+	    //            echo("$manifestUrl | $hashAlg | $hash | $filesize | $modified | $filename | $pid | ".urlencode($localId).' | '.urlencode($creator).' | '.urlencode($title).' | '.urlencode($date));
+	    //	    echo($item->id.'.checkm');
+
+	    //	    echo(' | ');
+	    /*
             echo(' | | '.$localId);
             echo(' | '.$creator);
             echo(' | '.$title);
