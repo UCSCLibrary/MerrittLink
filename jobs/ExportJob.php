@@ -22,17 +22,20 @@ class MerrittLink_ExportJob extends Omeka_Job_AbstractJob
 
    public function perform() {
        for($i=0;$i<96;$i++){
-           sleep(900);
-           $exports = get_db()->getTable('MerrittExportJob')->findBy(array('bid'=>$bid));
+	 
+           $exports = get_db()->getTable('MerrittExportJob')->findBy(array('bid'=>$this->_bid));
+
            foreach($exports as $export) {
+
                if($status = $export->checkStatus()){
                    $export->status = $status;
                    $export->save();
+		   if($status==='completed' || $status==="failed")
+		     die();
                }
            }               
 
-           if($status==='completed' || $status==="failed")
-               die();
+           sleep(900);
        }
    }
 }

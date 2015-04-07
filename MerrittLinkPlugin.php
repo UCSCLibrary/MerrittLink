@@ -31,8 +31,13 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
         'uninstall',
         'admin_head',
 //        'public_head',
-        'define_acl'
+        'define_acl',
+	'initialize'
     );
+
+    public function hookInitialize() {
+      require_once(dirname(__FILE__).'/jobs/ExportJob.php');
+    }
 
     /**
      * @var array Filters for the plugin.

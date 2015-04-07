@@ -41,39 +41,46 @@ class MerrittExportJob extends Omeka_Record_AbstractRecord
 
         $pollurl = "https://merritt.cdlib.org/istatus/bid/";
         $pollurl .= $this->bid."/jobfull";
-        
+
         $c = curl_init($pollurl);
-        curl_setopt($c, CURLOPT_POST, 1);
-        curl_setopt($c, CURLOPT_POSTFIELDS, 'login='.get_option('merritt_username').'&password='.get_option('merritt_password'));
+	//        curl_setopt($c, CURLOPT_POST, 1);
+	//        curl_setopt($c, CURLOPT_POSTFIELDS, 'login='.get_option('merritt_username').'&password='.get_option('merritt_password'));
         curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
         $json = curl_exec($c);
         curl_close($c);        
 
-        if(!isset($json) || !$json || ! $statusInfo = json_decode($json) || count($statusInfo['rows']) < 1 )
+        if(!isset($json) || !$json)
             return false;
+	$statusInfo = json_decode($json);
+	if( !$statusInfo || count($statusInfo->rows) < 1 )
+	  return false;
 
         $status = "completed";
-        foreach($statusInfo['rows'] as $job) {
-            $jid = $job['id'];
-            if ($job['value'] === "FAILED"){
+
+        foreach($statusInfo->rows as $job) {
+            $jid = $job->id;
+            if ($job->value === "FAILED"){
                 $status = "failed";
                 $this->fail($job);
             }
-            if ($job['value'] === "CONSUMED")
+            if ($job->value === "CONSUMED")
                 $status = "consumed";
-            if ($job['value'] != "COMPLETED" && $status == "completed")
+            if ($job->value != "COMPLETED" && $status == "completed")
                 $status = "pending";
-            if(isset($job['doc']['jobState']['primaryID'])){
-                $item_id = end(explode(':',$job['doc']['jobState']['localID']));
-                $ark = $job['doc']['jobState']['primaryID'];
-                $arkElement = get_db()->getTable('Element')->findByElementSetNameAndElementName('Item Type Metadata','ARK');
-                $arkMeta = new ElementText();
-                $elementText->recordType = 'Item';
-                $elementText->record_id = $item_id;
-                $elementText->element_id = $arkElement->id;
-                $elementText->html = 0;
-                $elementText->text = $ark;
-                $elementText->save();
+            if(isset($job->doc->jobState->primaryID)){
+	      $localIDs = explode(':',$job->doc->jobState->localID);
+	      $item_id = end($localIDs);
+	      $ark = $job->doc->jobState->primaryID;
+	      $arkElement = get_db()->getTable('Element')->findByElementSetNameAndElementName('Dublin Core','Identifier');
+	      if(!$arkElement)
+		return false;
+	      $arkMeta = new ElementText();
+	      $arkMeta->record_type = 'Item';
+	      $arkMeta->record_id = $item_id;
+	      $arkMeta->element_id = $arkElement->id;
+	      $arkMeta->html = 0;
+	      $arkMeta->text = $ark;
+	      $arkMeta->save();
             }
         }
         return $status;
@@ -88,10 +95,9 @@ class MerrittExportJob extends Omeka_Record_AbstractRecord
     protected function beforeSave($args)
     {
         $oldItem = get_record_by_id('MerrittExportJob',$this->id);
-        if($oldItem->status==="not submitted" && isset($this->bid)) {
+        if($oldItem && $oldItem->status==="not submitted" && isset($this->bid)) {
             //start polling job
             $options = array('bid'=>$this->bid);
-            include_once(dirname(dirname(__FILE__)).'/jobs/ExportJob.php');
             $dispacher = Zend_Registry::get('job_dispatcher');
             $dispacher->sendLongRunning('MerrittLink_ExportJob',$options);
             $this->status="newly submitted";
