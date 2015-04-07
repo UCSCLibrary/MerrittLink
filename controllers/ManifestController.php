@@ -46,17 +46,6 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
         return $this->_getSiteBase().public_url('merritt-link/manifest/object/item/'.$item->id);        
     }
 
-  public function testAction() {
-    echo("post:<pre>\n");
-    print_r($_POST);
-    echo("\n\nfiles:\n");
-    print_r($_FILES);
-    echo("</pre>");
-    die('d');
-  } 
-
-
-
     public function batchAction() {
       $this->getResponse()->setHeader('Content-Type', 'text/plain');
 
@@ -75,44 +64,45 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 
             $item = get_record_by_id('item',$item_id);
             
-	    $manifestUrl = $this->_getManifestUrl($item);
-	    $hash = '';
-	    $hashAlg = '';
-	    $filesize = '';
-	    $modified = '';
-	    $filename = $item->id.'.checkm';
-	    $pid = '';
+            $manifestUrl = $this->_getManifestUrl($item);
+            $hash = '';
+            $hashAlg = '';
+            $filesize = '';
+            $modified = '';
+            $filename = $item->id.'.checkm';
+            $pid = '';
             $title = metadata($item,array("Dublin Core","Title"));
-	    $creator = metadata($item,array("Dublin Core","Creator"));
+            $creator = metadata($item,array("Dublin Core","Creator"));
             $date = metadata($item,array("Dublin Core","Date"));
-            $localId = metadata($item,array("Dublin Core","Identifier"));
-
-	    $title = preg_replace('/[^A-Za-z0-9",.;:@#!%&_ \'\/\-\t\$\+\^\*\\\?\(\)]/', '', $title);
-	    $creator = preg_replace('/[^A-Za-z0-9",.:@ \'\/\-\t\(\)]/', '', $creator);
+            //       $localId = metadata($item,array("Dublin Core","Identifier"));
+            $localId = "$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]:$item->id";
+            
+            $title = preg_replace('/[^A-Za-z0-9",.;:@#!%&_ \'\/\-\t\$\+\^\*\\\?\(\)]/', '', $title);
+            $creator = preg_replace('/[^A-Za-z0-9",.:@ \'\/\-\t\(\)]/', '', $creator);
             $date = preg_replace('/[^A-Za-z0-9: \/\-]/', '', $date);
             $localId = preg_replace('/[^A-Za-z0-9",.;:@#!%&_ \'\/\-\t\$\+\^\*\\\?\(\)]/', '', $localId);
-
+            
             echo $manifestUrl;
-	    echo ' | '.$hashAlg;
-	    echo ' | '.$hash;
-	    echo ' | '.$filesize;
-	    echo ' | '.$modified;
-	    echo ' | '.$filename;
-	    echo ' | '.$pid;
-	    echo ' | '.$localId;
-	    echo ' | '.$creator;
-	    echo ' | '.$title;
-	    echo ' | '.$date;
-	    //            echo("$manifestUrl | $hashAlg | $hash | $filesize | $modified | $filename | $pid | ".urlencode($localId).' | '.urlencode($creator).' | '.urlencode($title).' | '.urlencode($date));
-	    //	    echo($item->id.'.checkm');
-
-	    //	    echo(' | ');
-	    /*
-            echo(' | | '.$localId);
-            echo(' | '.$creator);
-            echo(' | '.$title);
-            echo(' | '.$date);
-	    */
+            echo ' | '.$hashAlg;
+            echo ' | '.$hash;
+            echo ' | '.$filesize;
+            echo ' | '.$modified;
+            echo ' | '.$filename;
+            echo ' | '.$pid;
+            echo ' | '.$localId;
+            echo ' | '.$creator;
+            echo ' | '.$title;
+            echo ' | '.$date;
+            //            echo("$manifestUrl | $hashAlg | $hash | $filesize | $modified | $filename | $pid | ".urlencode($localId).' | '.urlencode($creator).' | '.urlencode($title).' | '.urlencode($date));
+            //	    echo($item->id.'.checkm');
+            
+            //	    echo(' | ');
+            /*
+              echo(' | | '.$localId);
+              echo(' | '.$creator);
+              echo(' | '.$title);
+              echo(' | '.$date);
+            */
             echo("\n");
         }    
         echo "#%eof";
@@ -125,6 +115,7 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
     }
 
     private function _getMetsLine($item) {
+        if(plugin_is_active('MetsExport')){
         require_once(dirname(dirname(dirname(__FILE__)))."/MetsExport/helpers/MetsExporter.php");
         $exporter = new MetsExporter();
         ob_start();
@@ -132,16 +123,10 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
         $metsXml = ob_get_clean();
         $metsUrl = $this->_getSiteBase().public_url('items/show/'.$item->id.'?output=METS');
         $metsFilename = 'Item_'.$item->id.'_mets.xml';
-        /*
-        $itemDir = $this->_getItemDir($item);
-        $metsFilename = 'Item_'.$item->id.'_mets.xml';
-        $metsFile = fopen($itemDir.'/'.$metsFilename,'w');
-        fwrite($metsFile,$metsXml);
-        fclose($metsFile);
-        */
-        //return( $this->_getSiteBase().public_url('files/Merritt/'.$item->id.'/'.$metsFilename) .' | md5 | '.md5($metsXml).' | '.$metsFilename);
-//        return( $metsUrl .' | md5 | '.md5($metsXml).' | | | '.$metsFilename);
         return( $metsUrl .' | | | | | '.$metsFilename);
+        } else {
+            return( $this->getSiteBase().public_url('items/show/'.$item->id.'?output=xml').' | | | | | Item_'.$item->id.'.xml');
+        }
     }
 
 }

@@ -30,7 +30,8 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
   {
       //initialize flash messenger for success or fail messages
       $flashMessenger = $this->_helper->FlashMessenger;
-
+      if(!function_exists('curl_version'))
+          $flashMessenger->addMessage("The program lib-curl must be installed to use this plugin. Please contact your system administrator.",'error');
       if ($this->getRequest()->isPost()) {
           try{
               if( $successMessage = $this->_processPost())
@@ -45,47 +46,49 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       $this->view->searchForm = items_search_form(array('id'=>'merritt-search-form'),'#','View Items');   
   }
 
-  private function _getItemsFromPost() {
-      return array(); //TODO
-  }
-
   private function _getSiteBase() {
       $protocol = stripos($_SERVER['SERVER_PROTOCOL'],'https') === true ? 'https://' : 'http://';
       return $protocol.$_SERVER['HTTP_HOST'];
   }
 
   private function _processPost() {
+
       if(isset($_POST['search'])) 
           $this->_returnSearchResults();
+
       $collection_id = $_POST['merritt_collection'];
       $collection = get_db()->getTable('MerrittCollection')->find($collection_id);
 
-      $job = new MerrittExportJob();
+      $user = current_user();
 
-      if(isset($_POST['bulkAdd'])){
-          $items = $this->_getItemsFromPost();
-          $job->items=serialize($items);
-      }else {
-          $job->items=serialize($_POST['export_items']);
-     } 
+      include_once(dirname(dirname(__FILE__)).'/models/MerrittExportJob.php');
+      $job = new MerrittExportJob();
+      $job->status = "not submitted";
+      $job->user_id=$user->id;
+      $job->items=serialize($_POST['export_items']);
       $job->save();
+
       $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);//TODO url of batch manifest
-      //            die($url);
-      return $this->_submitBatchToMerritt($url,$collection->slug);
+
+      $rval =  $this->_submitBatchToMerritt($url,$collection->slug,$job);
+
+      return $rval;
   }
 
   private function _getCollectionOptions() {
-     
       return $collectionTable;
   }
 
-  private function _submitBatchToMerritt($batchManifestUrl,$collection,$url='https://merritt.cdlib.org/object/ingest') {
+  private function _submitBatchToMerritt($batchManifestUrl,$collection,$job=false) {
+
+      $url='https://merritt.cdlib.org/object/ingest';
 
       $file = file_get_contents($batchManifestUrl);
       $tmpfname = tempnam(sys_get_temp_dir(), "merritt_");
       $handle = fopen($tmpfname, "w");	 
       fwrite($handle,$file);
       fclose($handle);	
+
 
       $curlCommand = 'curl -u '.get_option('merritt_username') . ":" . get_option('merritt_password');
 
@@ -111,8 +114,23 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       $data = json_decode($json);
       $state = $data->{'bat:batchState'};
       $status = $state->{'bat:batchStatus'};
-      if($status == 'ERROR' || $status == 'FAILURE')
+      $bid = $state->{'bat:batchID'};
+
+      //start job to check complete for the next 2 hours
+
+      if($status == 'ERROR' || $status == 'FAILED') {
+          if($job){
+              $job->status = "failed";
+              $job->save();
+          }
          return 'Failure exporting to merritt.'; 
+      }
+      if(!$job) {
+          $job = new MerrittExportJob();
+      }
+      $job->status = strtolower($status);
+      $job->bid = $bid;
+      $job->save();
       return "Successfully submitted Omeka items to Merritt with batch identifier ".$state->{'bat:batchID'}.". Items are now ".strtolower($status)."." ;
   }
 

@@ -15,17 +15,23 @@
 class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
 {
 
-    protected $_options = array('default_merritt_collection','merritt_username','merritt_password');
+    protected $_options = array(
+        'default_merritt_collection',
+        'merritt_username',
+        'merritt_password',
+        'merritt_lastcheck'
+    );
 
     protected $_hooks = array(
-        'admin_items_browse',
+//        'admin_items_browse',
         'config',
         'config_form',
+        'upgrade',
         'install',
         'uninstall',
         'admin_head',
-        'define_acl',
-        'initialize'
+//        'public_head',
+        'define_acl'
     );
 
     /**
@@ -33,16 +39,19 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
      */
     protected $_filters = array('admin_navigation_main');
 
-    
-    /**
-     * Require the job and helper files
-     *
-     * @return void
-     */
-    public function hookInitialize()
+    public function hookUpgrade($args)
     {
-        require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'jobs' . DIRECTORY_SEPARATOR . 'ExportJob.php';
-
+        $oldVersion = $args['old_version'];
+        $newVersion = $args['new_version'];
+        if($oldVersion < '1.5'){
+            $db = $this->_db;
+            $sql = "ALTER TABLE `$db->MerrittExportJob` ADD `user_id` int(10) unsigned NOT NULL AFTER `id`";
+            $db->query($sql);
+            $sql = "ALTER TABLE `$db->MerrittExportJob` ADD `status` text";
+            $db->query($sql);
+            $sql = "ALTER TABLE `$db->MerrittExportJob` ADD `bid` text";
+            $db->query($sql);    
+        }
     }
 
     public function hookAdminHead() {
@@ -50,8 +59,24 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
         queue_css_file('MerrittLink');
     }
 
+    public function hookPublicHead() {
+        if(time() - get_option('merritt_lastchecked') > 43200) { //every 12 hours at most
+            if($exports = get_db()->getTable("MerrittExportJob")->findBy(array('status'=>'pending'))) {
+                foreach($exports as $export) {
+                    if($status = $export->checkStatus()){
+                        $export->status = $status;
+                        $export->save();
+                    }
+                }               
+            }
+        }
+    }
+
     public function hookInstall(){
+        if(!function_exists('curl_version'))
+            throw new Exception("The program libcurl must be installed to use this plugin. Please contact your system administrator.");
         $this->_installOptions();
+        set_option('merritt_lastchecked',time());
         try{
             $sql = "
             CREATE TABLE IF NOT EXISTS `{$this->_db->MerrittCollection}` (
@@ -63,8 +88,11 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
             $sql = "
             CREATE TABLE IF NOT EXISTS `{$this->_db->MerrittExportJob}` (
                 `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                `user_id` int(10) unsigned NOT NULL,
                 `items` text,
                 `time` TIMESTAMP,
+                `status` text,
+                `bid` text,
                 PRIMARY KEY (`id`)
             ) ENGINE=MyISAM DEFAULT CHARSET=utf8;";
             $this->_db->query($sql);
@@ -106,18 +134,6 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
             set_option('merritt_password',$_REQUEST['merritt_password']);
     }
 
-    public function hookAdminItemsBrowse() {
-        /*
-        $item = get_record_by_id('Item',131);
-        require_once(dirname(__FILE__).'/helpers/manifest_functions.php');
-        $mf = new ManifestFactory();
-        $manifestUrl = $mf->createManifest($item);
-        $this->_pushToMerritt($item,$manifestUrl);
-        print_r();
-        die('END');
-        */
-    }
-
     /**
      * Define the plugin's access control list.
      *
@@ -146,49 +162,6 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
         );
         return $nav;
     }
-
-    private function _pushToMerritt($item,$manifestUrl,$type='single-object-manifest') {
-        $query = http_build_query(array(
-            'file' => $manifestUrl,
-            'type' => $type,
-            'profile' => get_option('merritt_profile'),
-            'digestType' =>'md5',
-            'digestValue' => md5(file_get_contents($manifestUrl)),
-            'creater' => metadata($item,array('Dublin Core','Creater')),
-            'title' => metadata($item,array('Dublin Core','Title')),
-            'date' => metadata($item,array('Dublin Core','Date')),
-            'localIdentifier' => metadata($item,array('Dublin Core','Identifier')),
-        ));
-
-        $ch = curl_init();
-
-        curl_setopt($ch, CURLOPT_URL,"https://merritt.cdlib.org/object/ingest");
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS,$query);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERPWD, get_option('merritt_username') . ":" . get_option('merritt_password')); 
-        $server_output = curl_exec ($ch);
-
-        curl_close ($ch);
-    }
-
+ 
 }
-
-//UPDATE FILE COMMAND
-/*
-curl -u $USERNAME:$USERPW -F "file=@$b.checkm" -F "type=container-batch-manifest" -F "profile=uci_lib_diskimage_content" https://merritt.cdlib.org/object/update
-*/
-//UPDATE METADATA COMMAND
-/*
-curl -u $USERNAME:$USERPW -F "file=@$b.checkm" -F "type=single-file-batch-manifest" -F "profile=uci_lib_diskimage_content" https://merritt.cdlib.org/object/update
-*/
-//DELETE COMMAND
-/*
-curl -u $USERNAME:$USERPW -F "file=@$b.checkm" -F "type=single-file-batch-manifest" -F "profile=uci_lib_diskimage_content" https://merritt.cdlib.org/object/update
-*/
-/*
-//INGEST COMMAND
-/*
-curl -u $USERNAME:$USERPW -F "file=@$b.checkm" -F "type=container-batch-manifest" -F "profile=uci_lib_diskimage_content" https://merritt.cdlib.org/object/ingest
-*/
 ?>
