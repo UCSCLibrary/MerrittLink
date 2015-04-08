@@ -63,14 +63,22 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
         foreach($items as $item_id => $val) {
 
             $item = get_record_by_id('item',$item_id);
-            
+
+            //find ark, if previously saved to Merritt
+            $pid = "";
+            $identifiers = metadata($item,array('Dublin Core','Identifier'),'all');
+            foreach ($identifiers as $identifier) {
+                if(strpos($identifier->text,'ark')!==FALSE)
+                    $pid = $identifier->text;
+            }
+          
             $manifestUrl = $this->_getManifestUrl($item);
             $hash = '';
             $hashAlg = '';
             $filesize = '';
             $modified = '';
             $filename = $item->id.'.checkm';
-            $pid = '';
+//            $pid = '';
             $title = metadata($item,array("Dublin Core","Title"));
             $creator = metadata($item,array("Dublin Core","Creator"));
             $date = metadata($item,array("Dublin Core","Date"));
