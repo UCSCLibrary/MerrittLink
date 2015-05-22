@@ -80,7 +80,6 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
   }
 
   private function _submitBatchToMerritt($batchManifestUrl,$collection,$job=false) {
-
       $url='https://merritt.cdlib.org/object/ingest';
       $file = file_get_contents($batchManifestUrl);
       $tmpfname = tempnam(sys_get_temp_dir(), "merritt_");

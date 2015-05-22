@@ -46,7 +46,7 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
     }
 
     public function batchAction() {
-      $this->getResponse()->setHeader('Content-Type', 'text/plain');
+        $this->getResponse()->setHeader('Content-Type', 'text/plain');
 
         $job_id = $this->getParam('job');
         $job = get_db()->getTable('MerrittExportJob')->find($job_id);
