@@ -20,8 +20,7 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 
         $item = get_record_by_id('Item',$this->getParam('item'));
 
-        if(plugin_is_active('MetsExport'))      
-            $metsline = $this->_getMetsLine($item);
+        $metsline = $this->_getMetsLine($item);
 
         ob_start();
         echo('#%checkm_0.7
@@ -60,14 +59,12 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 #%prefix | nfo: | http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#
 #%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:primaryIdentifier | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date
 ');
-        die('test');
         foreach($items as $item_id => $val) {
 
             $item = get_record_by_id('item',$item_id);
 
             //find ark, if previously saved to Merritt
             $pid = "";
-            die('test');
             $identifiers = metadata($item,array('Dublin Core','Identifier'),'all');
             foreach ($identifiers as $identifier) {
                 if(strpos($identifier,'ark')!==FALSE)
@@ -124,16 +121,16 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 
     private function _getMetsLine($item) {
         if(plugin_is_active('MetsExport')){
-        require_once(dirname(dirname(dirname(__FILE__)))."/MetsExport/helpers/MetsExporter.php");
-        $exporter = new MetsExporter();
-        ob_start();
-        $exporter->exportItem($item->id);
-        $metsXml = ob_get_clean();
-        $metsUrl = $this->_getSiteBase().public_url('items/show/'.$item->id.'?output=METS');
-        $metsFilename = 'Item_'.$item->id.'_mets.xml';
-        return( $metsUrl .' | | | | | '.$metsFilename);
+            require_once(dirname(dirname(dirname(__FILE__)))."/MetsExport/helpers/MetsExporter.php");
+            $exporter = new MetsExporter();
+            ob_start();
+            $exporter->exportItem($item->id);
+            $metsXml = ob_get_clean();
+            $metsUrl = $this->_getSiteBase().public_url('items/show/'.$item->id.'?output=METS');
+            $metsFilename = 'Item_'.$item->id.'_mets.xml';
+            return( $metsUrl .' | | | | | '.$metsFilename);
         } else {
-            return( $this->getSiteBase().public_url('items/show/'.$item->id.'?output=xml').' | | | | | Item_'.$item->id.'.xml');
+            return( $this->getSiteBase().public_url('items/show/'.$item->id.'?output=omeka-xml').' | | | | | Item_'.$item->id.'.xml');
         }
     }
 

@@ -68,7 +68,7 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       $job->items=serialize($_POST['export_items']);
       $job->save();
 
-      $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);//TODO url of batch manifest
+      $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);
 
       $rval =  $this->_submitBatchToMerritt($url,$collection->slug,$job);
 
@@ -82,13 +82,12 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
   private function _submitBatchToMerritt($batchManifestUrl,$collection,$job=false) {
 
       $url='https://merritt.cdlib.org/object/ingest';
-
+      die($batchManifestUrl);
       $file = file_get_contents($batchManifestUrl);
       $tmpfname = tempnam(sys_get_temp_dir(), "merritt_");
       $handle = fopen($tmpfname, "w");	 
       fwrite($handle,$file);
       fclose($handle);	
-
 
       $curlCommand = 'curl -u '.get_option('merritt_username') . ":" . get_option('merritt_password');
 
@@ -110,7 +109,6 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       unlink($tmpfname);
       
       $json = implode("\n",$output);
-
       $data = json_decode($json);
       $state = $data->{'bat:batchState'};
       $status = $state->{'bat:batchStatus'};
@@ -131,6 +129,9 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       $job->status = strtolower($status);
       $job->bid = $bid;
       $job->save();
+
+      fire_plugin_hook('export',array('records'=>unserialize($job->items),'service'=>'Merritt'));
+      
       return "Successfully submitted Omeka items to Merritt with batch identifier ".$state->{'bat:batchID'}.". Items are now ".strtolower($status)."." ;
   }
 
