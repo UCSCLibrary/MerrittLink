@@ -60,16 +60,18 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
 #%prefix | nfo: | http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#
 #%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:primaryIdentifier | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date
 ');
+        die('test');
         foreach($items as $item_id => $val) {
 
             $item = get_record_by_id('item',$item_id);
 
             //find ark, if previously saved to Merritt
             $pid = "";
+            die('test');
             $identifiers = metadata($item,array('Dublin Core','Identifier'),'all');
             foreach ($identifiers as $identifier) {
-                if(strpos($identifier->text,'ark')!==FALSE)
-                    $pid = $identifier->text;
+                if(strpos($identifier,'ark')!==FALSE)
+                    $pid = $identifier;
             }
           
             $manifestUrl = $this->_getManifestUrl($item);
@@ -78,12 +80,10 @@ class MerrittLink_ManifestController extends Omeka_Controller_AbstractActionCont
             $filesize = '';
             $modified = '';
             $filename = $item->id.'.checkm';
-//            $pid = '';
             $title = metadata($item,array("Dublin Core","Title"));
             $creator = metadata($item,array("Dublin Core","Creator"));
             $date = metadata($item,array("Dublin Core","Date"));
-            //       $localId = metadata($item,array("Dublin Core","Identifier"));
-            $localId = "$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]:$item->id";
+            $localId = $item->id;
             
             $title = preg_replace('/[^A-Za-z0-9",.;:@#!%&_ \'\/\-\t\$\+\^\*\\\?\(\)]/', '', $title);
             $creator = preg_replace('/[^A-Za-z0-9",.:@ \'\/\-\t\(\)]/', '', $creator);
