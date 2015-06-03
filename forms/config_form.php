@@ -64,3 +64,7 @@ foreach($collections as $collection) {
 }
 ?>
 </ul>
+<?php $csrf = new Omeka_Form_Element_SessionCsrfToken('csrf_token');?>
+<script>
+var csrf_token = "<?php echo $csrf->getToken();?>";
+</script>

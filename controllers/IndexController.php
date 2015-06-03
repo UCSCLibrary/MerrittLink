@@ -32,6 +32,7 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       $flashMessenger = $this->_helper->FlashMessenger;
       if(!function_exists('curl_version'))
           $flashMessenger->addMessage("The program lib-curl must be installed to use this plugin. Please contact your system administrator.",'error');
+
       if ($this->getRequest()->isPost()) {
           try{
               if( $successMessage = $this->_processPost())
@@ -43,7 +44,60 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           }
       }
       $this->view->collectionOptions = get_db()->getTable('MerrittCollection')->findPairsForSelectForm();
-      $this->view->searchForm = items_search_form(array('id'=>'merritt-search-form'),'#','View Items');   
+      $form = items_search_form(array('id'=>'merritt-search-form'),'#','View Items');   
+      $this->view->searchForm = $form;
+
+      $csrf = new Omeka_Form_SessionCsrf;
+      $this->view->csrf = $csrf;
+  }
+
+  public function logAction() {
+    //TODO write view form
+    //verify view form
+    //use it to populate $fields
+
+    $this->getResponse()->setHeader('Content-Type', 'text/csv');
+    //additional fields, if you like
+    $fields = array(
+		    //		    'Dublin Core' => 'Coverage',
+		    //		    'Dublin Core' => 'Creator'
+		    );
+
+    //    $logs = get_db()->getTable('MerrittExportJob')->getReport($fields);
+    $logs = get_db()->getTable('MerrittExportJob')->getReport();
+
+    $header = array('Item ID','Title','Exporting User','Date Exported','Description','ARK');
+    foreach($log['custom'] as $fieldname => $value)
+      $header[] = $fieldname;
+
+    foreach($logs as $log) {
+      $newExport = array(
+			 $log['item_id'],
+			 $log['title'],
+			 $log['user'],
+			 $log['date'],
+			 $log['description'],
+			 $log['ark']
+			 );
+      if( isset($log['custom']) && is_array($log['custom']) )
+	foreach($log['custom'] as $fieldname => $value)
+	  $newExport[] = $value;
+      
+      $exports[] = $newExport;
+    }	
+    $this->_outputCSV($exports);
+    die();
+  }
+
+  private function _outputCSV($data,$header) {
+    $outstream = fopen("php://output", 'w');
+    if($header)
+      fputcsv($outstream, $header);
+    function __outputCSV(&$vals, $key, $filehandler) {
+      fputcsv($filehandler, $vals);
+    }
+    array_walk($data, '__outputCSV', $outstream);
+    fclose($outstream);
   }
 
   private function _getSiteBase() {
@@ -53,28 +107,32 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
 
   private function _processPost() {
 
-      if(isset($_POST['search'])) 
-          $this->_returnSearchResults();
+    if(isset($_POST['search'])) 
+      $this->_returnSearchResults();
 
-      $collection_id = $_POST['merritt_collection'];
-      $collection = get_db()->getTable('MerrittCollection')->find($collection_id);
+    $csrf = new Omeka_Form_SessionCsrf();
+    if(!$csrf->isValid($_POST))
+      return false;
 
-      $user = current_user();
+    $collection_id = $_POST['merritt_collection'];
+    $collection = get_db()->getTable('MerrittCollection')->find($collection_id);
 
-      include_once(dirname(dirname(__FILE__)).'/models/MerrittExportJob.php');
-      $job = new MerrittExportJob();
-      $job->status = "not submitted";
-      $job->user_id=$user->id;
-      $job->items=serialize($_POST['export_items']);
-      $job->save();
+    $user = current_user();
 
-      $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);
+    include_once(dirname(dirname(__FILE__)).'/models/MerrittExportJob.php');
+    $job = new MerrittExportJob();
+    $job->status = "not submitted";
+    $job->user_id=$user->id;
+    $job->items=serialize($_POST['export_items']);
+    $job->save();
 
-      $rval =  $this->_submitBatchToMerritt($url,$collection->slug,$job);
-
-      return $rval;
+    $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);
+    
+    $rval =  $this->_submitBatchToMerritt($url,$collection->slug,$job);
+    
+    return $rval;
   }
-
+    
   private function _getCollectionOptions() {
       return $collectionTable;
   }
@@ -87,8 +145,8 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       fwrite($handle,$file);
       fclose($handle);	
 
-      $curlCommand = 'curl -u '.get_option('merritt_username') . ":" . get_option('merritt_password');
-
+      $curlCommand = 'curl -u '.get_option('merritt_username');
+      $curlCommand .= ":" . get_option('merritt_password');
       $curlCommand .= ' -F "file=@'.$tmpfname.'"';
       $curlCommand .= ' -F "type=container-batch-manifest"';
       $curlCommand .= ' -F "responseForm=json"';
@@ -133,6 +191,16 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       return "Successfully submitted Omeka items to Merritt with batch identifier ".$state->{'bat:batchID'}.". Items are now ".strtolower($status)."." ;
   }
 
+  private function _has_ark($item){
+    //find ark, if previously saved to Merritt
+    $identifiers = metadata($item,array('Dublin Core','Identifier'),'all');
+    foreach ($identifiers as $identifier) {
+      if(strpos($identifier,'ark')!==FALSE)
+	return true;
+    }
+    return false;
+  }
+
   private function _returnSearchResults() {
       
       $selectItems = true;
@@ -146,7 +214,12 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           $items = array_slice($items,0,20);
       }
       $return = array();
+      $flag = false;
+
       foreach($items as $item) {
+
+	if($this->_has_ark($item))
+	  $flag=true;
 
           $description = metadata($item,array("Dublin Core","Description"),array('snippet'=>'250'));
           if(!$description)
@@ -165,6 +238,6 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
               'thumb'=> $thumb,
           );
       }
-      die(json_encode($return));
+      die(json_encode(array('flag'=>$flag,'items'=>$return)));
   }
 }

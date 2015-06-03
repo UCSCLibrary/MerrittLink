@@ -20,5 +20,6 @@ echo flash();
 <?php endforeach; ?>
 </input>
 <input type="submit" name="merritt_export" value="Export Items" />
+  <?php echo $this->csrf;?>
 </form>
 <?php echo foot();?>
