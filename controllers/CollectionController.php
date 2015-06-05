@@ -22,7 +22,8 @@ class MerrittLink_CollectionController extends Omeka_Controller_AbstractActionCo
   public function addAction()
   {
     //verify csrf
-    $this->_validateCsrf();
+      if(version_compare(OMEKA_VERSION,'2.2.1') >= 0)
+          $this->_validateCsrf();
 
     $slug = $this->getParam('slug');
     $collection = new MerrittCollection();

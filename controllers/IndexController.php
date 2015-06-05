@@ -47,7 +47,10 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
       $form = items_search_form(array('id'=>'merritt-search-form'),'#','View Items');   
       $this->view->searchForm = $form;
 
-      $csrf = new Omeka_Form_SessionCsrf;
+      $csrf = 0;
+      if(version_compare(OMEKA_VERSION,'2.2.1') >= 0)
+          $csrf = new Omeka_Form_SessionCsrf;
+
       $this->view->csrf = $csrf;
   }
 
