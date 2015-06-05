@@ -49,7 +49,7 @@ class Table_MerrittExportJob extends Omeka_Db_Table
                 if(strpos($identifier,'ark')!==FALSE)
                     $pid = $identifier;
             }
-	    return $pid
+            return $pid;
     }
 
 }

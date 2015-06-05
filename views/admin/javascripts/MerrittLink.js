@@ -13,15 +13,14 @@ function registerDeleteButtons() {
 }
 
 function registerExportButton() {
-   merritt_resubmission_flag = false;    
-    jQuery('.merritt-link input#merritt_export').click(function(e) {
-
-	if(!merritt_submission_flag)
-	    return;
-	e.preventDefault();
-	alert('One or more of the items you have chosen for export seems to already have an identifier in Merritt. New versions of these items will be created. Is this ok?');
-	e.submit();
-    }
+    merritt_resubmission_flag = false;    
+    jQuery('.merritt-link input#merritt_export').click(function(e) {    
+	    if(!merritt_submission_flag)
+		return;
+	    e.preventDefault();
+	    alert('One or more of the items you have chosen for export seems to already have an identifier in Merritt. New versions of these items will be created. Is this ok?');
+	    jQuery(this).submit();
+	});
 }
 
 jQuery(document).ready(function() {

@@ -73,5 +73,5 @@ foreach($collections as $collection) {
    }
    ?>
      <script>
-        var csrf_token = "<?php echo $csrf();?>";
+        var csrf_token = "<?php echo $csrf;?>";
      </script>
