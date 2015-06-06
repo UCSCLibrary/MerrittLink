@@ -23,7 +23,7 @@ function registerExportButton() {
 		    if(!this.checked)
 			return false;
 		    console.log(jQuery(this).siblings('.resubmission'));
-		    return false;
+		    flag=true;
 		    if(jQuery(this).siblings('.resubmission').length = 0)
 			return false;
 		    flag=true;
