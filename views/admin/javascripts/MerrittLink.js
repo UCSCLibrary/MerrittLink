@@ -21,12 +21,11 @@ function registerExportButton() {
 	    flag = false;
 	    jQuery('form#merritt-export input[type=checkbox]').each(function () {
 		    if(!this.checked)
-			return false;
-		    console.log(jQuery(this).siblings('.resubmission'));
+			return true;
+		    if(jQuery(this).siblings('.resubmission').length == 0)
+			return true;
 		    flag=true;
-		    if(jQuery(this).siblings('.resubmission').length = 0)
-			return false;
-		    flag=true;
+		    console.log('flagged');
 		});
 	    if(flag) {
 		e.preventDefault();
