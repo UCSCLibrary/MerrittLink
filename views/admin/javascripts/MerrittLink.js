@@ -25,7 +25,6 @@ function registerExportButton() {
 		    if(jQuery(this).siblings('.resubmission').length == 0)
 			return true;
 		    flag=true;
-		    console.log('flagged');
 		});
 	    if(flag) {
 		e.preventDefault();
