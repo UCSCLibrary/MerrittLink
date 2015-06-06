@@ -1,3 +1,4 @@
+var merrittmodalflag = false;
 function registerDeleteButtons() {
 
     jQuery('.merritt-delete-button').click(function(e) {
@@ -13,27 +14,27 @@ function registerDeleteButtons() {
 }
 
 function registerExportButton() {
-    console.log('registered');
-    jQuery('.merritt-link input#merritt_export').click(function(e) {    
-	    e.preventDefault();
-	    flag = false;
-	    jQuery('input[type=checkbox]').each(function () {
-		    if(this.checked){
-			flag=true;
-			console.log('FLAGGED');
-		    }
-		});
-	    if(!flag)
+    jQuery('#dialog').jqm();
+    jQuery('form#merritt-export').submit(function(e) {    
+	    if(merrittmodalflag)
 		return;
-	    e.preventDefault();
-	    alert('One or more of the items you have chosen for export seems to already have an identifier in Merritt. New versions of these items will be created. Is this ok?');
-	    jQuery('.merritt-link form#merritt-search-form').submit();
+	    flag = false;
+	    jQuery('form#merritt-export input[type=checkbox]').each(function () {
+		    if(!this.checked)
+			return false;
+		    if(jQuery(this).siblings('.resubmission').length = 0)
+			return false;
+		    flag=true;
+		});
+	    if(flag) {
+		e.preventDefault();
+		jQuery('#dialog').jqmShow();
+	    }
 	});
 }
 
 jQuery(document).ready(function() {
      registerDeleteButtons();
-     registerExportButton();
 
     jQuery('#add_merritt_collection_button').click(function(e) {
 	e.preventDefault();
@@ -78,10 +79,19 @@ jQuery(document).ready(function() {
 			    if(checkboxes) 
 				itemLi += '<input type="checkbox" name="export_items['+item.id+']" />';
 			    if(item.resubmission)
-				itemLi += '<input type="hidden" name="resubmission['+item.id+']" value="'+item.resubmission+'"/>';
+				itemLi += '<input type="hidden" class="resubmission" name="resubmission['+item.id+']" value="'+item.resubmission+'"/>';
 			    itemLi += item.thumb+'<div><h3>'+item.title+'</h3><p>'+item.description+'</p></div></li>';
 			    itemsUl.append(itemLi);
 			});
+		    registerExportButton();
 		});
 	});
+
+    jQuery("a#dialogok").click(function(e) {
+	    e.preventDefault();
+	    merrittmodalflag=true;
+	    jQuery('form#merritt-export').submit();
+	    jQuery('#dialog').jqmHide();
+	});
+    
     });

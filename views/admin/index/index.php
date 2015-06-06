@@ -23,4 +23,18 @@ echo flash();
   <?php echo $this->csrf;?>
 </form>
     </div>
+
+
+<div class="jqmWindow" id="dialog">
+  <h2>
+    Confirm Duplicate Submission
+    </h2>
+  <p>
+    One or more of the items you have chosen for export seems to already have an identifier in Merritt. New versions of these items will be created in Merritt. Is this ok?
+  </p>
+		     <a href="#" id="dialogok"><button>OK</button></a> 
+		     <a href="#" class="jqmClose"><button>Cancel</button></a>
+		     </div>
+</div>
+		     
 <?php echo foot();?>

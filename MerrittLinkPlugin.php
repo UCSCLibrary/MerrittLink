@@ -55,6 +55,8 @@ class MerrittLinkPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     public function hookAdminHead() {
+        queue_js_file('jqModal');
+        queue_css_file('jqModal');
         queue_js_file('MerrittLink');
         queue_css_file('MerrittLink');
     }
