@@ -56,7 +56,6 @@ jQuery(document).ready(function() {
 
 	jQuery.post(url,jQuery('#merritt-search-form').serialize(),function(items){
 	    jQuery('#merritt-export').show();
-	    merritt_resubmission_flag = data.flag;
 	    checkboxes = true;
 	    if(items.length > 200) {
 		jQuery('#merritt-export-form').prepend('<input type="hidden" name="bulkAdd" value="true" />');
