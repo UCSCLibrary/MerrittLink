@@ -35,6 +35,6 @@ echo flash();
 		     <a href="#" id="dialogok"><button>OK</button></a> 
 		     <a href="#" class="jqmClose"><button>Cancel</button></a>
 		     </div>
-</div>
+
 		     
 <?php echo foot();?>
