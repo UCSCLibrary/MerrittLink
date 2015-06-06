@@ -22,4 +22,5 @@ echo flash();
 <input type="submit" name="merritt_export" value="Export Items" />
   <?php echo $this->csrf;?>
 </form>
+    </div>
 <?php echo foot();?>

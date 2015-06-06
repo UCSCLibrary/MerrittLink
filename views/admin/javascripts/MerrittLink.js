@@ -13,16 +13,15 @@ function registerDeleteButtons() {
 }
 
 function registerExportButton() {
-	    e.preventDefault();
-    merritt_resubmission_flag = false;    
     jQuery('.merritt-link input#merritt_export').click(function(e) {    
+	    e.preventDefault();
 	    flag = false;
 	    jQuery('input[type=checkbox]').each(function () {
 		    if(this.checked){
 			flag=true;
 			console.log('FLAGGED');
 		    }
-		}
+		});
 	    if(!flag)
 		return;
 	    e.preventDefault();
