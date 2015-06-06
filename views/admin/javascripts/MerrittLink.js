@@ -54,10 +54,8 @@ jQuery(document).ready(function() {
 
 	jQuery('#merritt-items').html('');
 
-	jQuery.post(url,jQuery('#merritt-search-form').serialize(),function(rdata){
+	jQuery.post(url,jQuery('#merritt-search-form').serialize(),function(items){
 	    jQuery('#merritt-export').show();
-	    data = jQuery.parseJSON(rdata);
-	    items = data.items;
 	    merritt_resubmission_flag = data.flag;
 	    checkboxes = true;
 	    if(items.length > 200) {
@@ -65,11 +63,12 @@ jQuery(document).ready(function() {
 		checkboxes = false;
 	    }
 	    itemsUl = jQuery('#merritt-items');
-	    jQuery.each(items,function(i,item){
-		
+	    jQuery.each(items,function(i,item){		
 		itemLi  = '<li id="merritt-item-div-'+item.id+'">';
 		if(checkboxes) 
 		    itemLi += '<input type="checkbox" name="export_items['+item.id+']" />';
+		if(item.resubmission)
+		    itemLi += '<input type="hidden" name="resubmission['+item.id+']" value="'+item.resubmission+'"/>';
 		itemLi += item.thumb+'<div><h3>'+item.title+'</h3><p>'+item.description+'</p></div></li>';
 		itemsUl.append(itemLi);
 	    });

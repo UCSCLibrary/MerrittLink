@@ -130,7 +130,7 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
     $job->save();
 
     $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);
-    
+    die($url);
     $rval =  $this->_submitBatchToMerritt($url,$collection->slug,$job);
     
     return $rval;
@@ -217,12 +217,10 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           $items = array_slice($items,0,20);
       }
       $return = array();
-      $flag = false;
 
       foreach($items as $item) {
 
-	if($this->_has_ark($item))
-	  $flag=true;
+          $resubmission = $this->_has_ark($item);
 
           $description = metadata($item,array("Dublin Core","Description"),array('snippet'=>'250'));
           if(!$description)
@@ -234,13 +232,14 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           if(!$thumb)
               $thumb = '<img alt="No Image Available" src="xxx" style="border:1px solid black; width: 100px;"/>';
 
-          $return[]=array(
+          $items[]=array(
               'id'=>$item->id,
               'title'=> $title,
               'description'=> $description,
               'thumb'=> $thumb,
+              'resubmission'=>$resubmission
           );
       }
-      die(json_encode(array('flag'=>$flag,'items'=>$return)));
+      die(json_encode($items));
   }
 }
