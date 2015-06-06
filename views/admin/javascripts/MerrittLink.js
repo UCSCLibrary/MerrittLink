@@ -22,6 +22,8 @@ function registerExportButton() {
 	    jQuery('form#merritt-export input[type=checkbox]').each(function () {
 		    if(!this.checked)
 			return false;
+		    console.log(jQuery(this).siblings('.resubmission'));
+		    return false;
 		    if(jQuery(this).siblings('.resubmission').length = 0)
 			return false;
 		    flag=true;
