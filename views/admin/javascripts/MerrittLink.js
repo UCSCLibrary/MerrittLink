@@ -13,6 +13,7 @@ function registerDeleteButtons() {
 }
 
 function registerExportButton() {
+    console.log('registered');
     jQuery('.merritt-link input#merritt_export').click(function(e) {    
 	    e.preventDefault();
 	    flag = false;
