@@ -232,7 +232,7 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
           if(!$thumb)
               $thumb = '<img alt="No Image Available" src="xxx" style="border:1px solid black; width: 100px;"/>';
 
-          $items[]=array(
+          $return[]=array(
               'id'=>$item->id,
               'title'=> $title,
               'description'=> $description,
@@ -240,6 +240,6 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
               'resubmission'=>$resubmission
           );
       }
-      die(json_encode($items));
+      die(json_encode($return));
   }
 }

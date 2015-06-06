@@ -47,31 +47,32 @@ jQuery(document).ready(function() {
     });
 
     jQuery('#merritt-search-form > #submit_search_advanced').click(function(e) {
-	e.preventDefault();
-	url= jQuery('#merritt-search-form').attr('action');
-
-	jQuery('#merritt-selection-buttons').show();
-
-	jQuery('#merritt-items').html('');
-
-	jQuery.post(url,jQuery('#merritt-search-form').serialize(),function(items){
-	    jQuery('#merritt-export').show();
-	    checkboxes = true;
-	    if(items.length > 200) {
-		jQuery('#merritt-export-form').prepend('<input type="hidden" name="bulkAdd" value="true" />');
-		checkboxes = false;
-	    }
-	    itemsUl = jQuery('#merritt-items');
-	    jQuery.each(items,function(i,item){		
-		itemLi  = '<li id="merritt-item-div-'+item.id+'">';
-		if(checkboxes) 
-		    itemLi += '<input type="checkbox" name="export_items['+item.id+']" />';
-		if(item.resubmission)
-		    itemLi += '<input type="hidden" name="resubmission['+item.id+']" value="'+item.resubmission+'"/>';
-		itemLi += item.thumb+'<div><h3>'+item.title+'</h3><p>'+item.description+'</p></div></li>';
-		itemsUl.append(itemLi);
-	    });
+	    e.preventDefault();
+	    url= jQuery('#merritt-search-form').attr('action');
+	    
+	    jQuery('#merritt-selection-buttons').show();
+	    
+	    jQuery('#merritt-items').html('');
+	    
+	    jQuery.post(url,jQuery('#merritt-search-form').serialize(),function(json){
+		    items = jQuery.parseJSON(json);
+		    jQuery('#merritt-export').show();
+		    checkboxes = true;
+		    if(items.length > 200) {
+			jQuery('#merritt-export-form').prepend('<input type="hidden" name="bulkAdd" value="true" />');
+			checkboxes = false;
+		    }
+		
+		    itemsUl = jQuery('#merritt-items');
+		    jQuery.each(items,function(i,item){		
+			    itemLi  = '<li id="merritt-item-div-'+item.id+'">';
+			    if(checkboxes) 
+				itemLi += '<input type="checkbox" name="export_items['+item.id+']" />';
+			    if(item.resubmission)
+				itemLi += '<input type="hidden" name="resubmission['+item.id+']" value="'+item.resubmission+'"/>';
+			    itemLi += item.thumb+'<div><h3>'+item.title+'</h3><p>'+item.description+'</p></div></li>';
+			    itemsUl.append(itemLi);
+			});
+		});
 	});
     });
-
-});
