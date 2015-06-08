@@ -10,6 +10,7 @@ class Table_MerrittExportJob extends Omeka_Db_Table
 
     public function getLog($fields=false,$datestart=false,$dateend=false){
       if(!$fields) $fields = array();
+      $custom = array();
       
       //ignore date range for now
       $jobs = $this->findAll();
@@ -20,12 +21,12 @@ class Table_MerrittExportJob extends Omeka_Db_Table
 	if(!$user) $user = new User;
 	$item_ids = unserialize($job['items']);
 	$time = $job['time'];
-	foreach($item_ids as $item_id) {
-	  $item = get_record_by_id('Item',$item->id);
+	foreach($item_ids as $item_id=>$on) {
+	  $item = get_record_by_id('Item',$item_id);
 	  if(!$item) $item = new Item;
 
-	  foreach($fields as $fieldset => $fieldname)
-	    $custom[$fieldname] = metadata($item,array($fieldset,$fieldname));
+	  foreach($fields as $field)
+	    $custom[$field['name']] = metadata($item,array($field['fieldset'],$field['name']));
 
 	  $data[] = array(
 			 'item_id'=>$item_id,
@@ -35,7 +36,7 @@ class Table_MerrittExportJob extends Omeka_Db_Table
 			 'description'=>metadata($item,array('Dublin Core','Description')),
 			 'ark'=>$this->_getArk($item),
 			 'custom'=>$custom
-			 );
+      );
 	}
       }
       return $data;
@@ -51,6 +52,7 @@ class Table_MerrittExportJob extends Omeka_Db_Table
             }
             return $pid;
     }
+
 
 }
 ?>

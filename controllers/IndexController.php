@@ -59,36 +59,40 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
     //verify view form
     //use it to populate $fields
 
-    $this->getResponse()->setHeader('Content-Type', 'text/csv');
-    //additional fields, if you like
+    $this->getResponse()->setHeader('Content-Type', 'text/plain');
+//    $this->getResponse()->setHeader('Content-Type', 'text/csv');
+    
+//additional fields, if you like
     $fields = array(
 		    //		    'Dublin Core' => 'Coverage',
 		    //		    'Dublin Core' => 'Creator'
 		    );
 
-    //    $logs = get_db()->getTable('MerrittExportJob')->getReport($fields);
-    $logs = get_db()->getTable('MerrittExportJob')->getReport();
+    $logs = get_db()->getTable('MerrittExportJob')->getLog($fields);
 
     $header = array('Item ID','Title','Exporting User','Date Exported','Description','ARK');
-    foreach($log['custom'] as $fieldname => $value)
-      $header[] = $fieldname;
 
     foreach($logs as $log) {
-      $newExport = array(
-			 $log['item_id'],
-			 $log['title'],
-			 $log['user'],
-			 $log['date'],
-			 $log['description'],
-			 $log['ark']
-			 );
+        foreach($log['custom'] as $fieldname => $value)
+            $header[] = $fieldname;
+
+        $newExport = array(
+            $log['item_id'],
+            $log['title'],
+            $log['user'],
+            $log['date'],
+            $log['description'],
+            $log['ark']
+        );
       if( isset($log['custom']) && is_array($log['custom']) )
 	foreach($log['custom'] as $fieldname => $value)
 	  $newExport[] = $value;
       
       $exports[] = $newExport;
     }	
-    $this->_outputCSV($exports);
+    echo '<pre>';
+    $this->_outputCSV($exports,$header);
+    echo '</pre>';
     die();
   }
 

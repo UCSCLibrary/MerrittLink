@@ -4,6 +4,11 @@ $head = array('bodyclass' => 'merritt-link primary',
 echo head($head);
 echo flash();
 ?>
+<a href="<?php echo admin_url('merritt-link/log/generate');?>">
+  <button class="big green" style="float:right">
+    Generate log of Merritt submissions
+  </button>
+</a>
 <h2>Select items to Export to Merritt</h2>
 <button id="merritt-toggle-search" style="display:none">Show/Hide search form</button>
 <?php echo $this->searchForm; ?>
