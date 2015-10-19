@@ -134,9 +134,7 @@ class MerrittLink_IndexController extends Omeka_Controller_AbstractActionControl
     $job->save();
 
     $url = $this->_getSiteBase().public_url('merritt-link/manifest/batch/job/'.$job->id);
-    die($url);
     $rval =  $this->_submitBatchToMerritt($url,$collection->slug,$job);
-    
     return $rval;
   }
     
